@@ -5,5 +5,5 @@
 
  Copy the .mez to "Documents\Power BI Desktop\Custom Connectors\"
 
-  `Copy-Item "C:\Users\ClarkMaine\OneDrive - Clean Energy Associates\Documents\Power BI Desktop\Custom Connectors\WooCommerceConnector\Woocommerce\bin\AnyCPU\Debug\WooCommerce.mez" "C:\Users\ClarkMaine\OneDrive - Clean Energy Associates\Documents\Power BI Desktop\Custom Connectors\WooCommerce.mez"
+  `Copy-Item "%UserProfile%\Documents\Power BI Desktop\Custom Connectors\WooCommerceConnector\Woocommerce\bin\AnyCPU\Debug\WooCommerce.mez" "%UserProfile%\Documents\Power BI Desktop\Custom Connectors\WooCommerce.mez"
  `
