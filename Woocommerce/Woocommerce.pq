@@ -40,6 +40,7 @@ ConnectorParams = type function (
         objects = #table(
             {"Name",       "Key",  "Data",                "ItemKind", "ItemName", "IsLeaf"},{
             {"Orders",   "Orders",  WooCommerce.Sales(siteurl, api_version) , "Table",    "Table",    true},
+            {"Products",   "Products",  WooCommerce.Products(siteurl, api_version) , "Table",    "Table",    true},
             {"OrdersByDate",   "OrdersByDate",  WooCommerce.OrdersByDate , "Function",    "Function",    true},
             {"Subscriptions",   "Subscriptions",  WooCommerce.Subscriptions(siteurl) , "Table",    "Table",    true}
         }),
@@ -66,6 +67,7 @@ WooCommerce.OrdersByDate = (siteurl as text, api_version as text, StartDate as d
     DataTypes = Table.TransformColumnTypes(ExpandRecords,{{"id", Int64.Type}, {"number", type text}, {"parent_id", Int64.Type}, {"order_key", type text}, {"created_via", type text}, {"version", type text}, {"status", type text}, {"currency", type text}, {"date_created", type datetime}, {"date_created_gmt", type datetime}, {"date_modified", type datetime}, {"date_modified_gmt", type datetime}, {"discount_total", type number}, {"discount_tax", type number}, {"shipping_total", type number}, {"shipping_tax", type number}, {"cart_tax", type number}, {"total", type number}, {"total_tax", type number}, {"prices_include_tax", type logical}, {"customer_id", Int64.Type}, {"customer_ip_address", type text}, {"customer_user_agent", type text}, {"customer_note", type text}, {"payment_method", type text}, {"payment_method_title", type text}, {"transaction_id", type text}, {"date_paid", type datetime}, {"date_paid_gmt", type datetime}, {"date_completed", type datetime}, {"date_completed_gmt", type datetime}, {"cart_hash", type text}})
 in
         DataTypes;
+
 WooCommerce.Subscriptions = (siteurl as text) =>
     let
         InitialURL = Uri.Combine( siteurl, "wp-json/wc/v1/subscriptions"),
@@ -78,6 +80,22 @@ WooCommerce.Subscriptions = (siteurl as text) =>
                ToTable = Table.FromRecords(List.Combine(Pagination))
                in 
                    ToTable ;
+
+
+WooCommerce.Products = (siteurl as text, api_version as text) =>
+    let
+            InitialURL = Uri.Combine( siteurl, "/wp-json/wc/" & api_version & "/products"),
+            Pagination = List.Generate( ()=>
+           [Result = try WooCommerce.GetData(InitialURL) otherwise null, NextLink = Value.Metadata(Result)[NextLink]],
+           each [Result] <> null ,
+            each    [Result=  try WooCommerce.GetData( [NextLink]) otherwise null, 
+                    NextLink=Value.Metadata(Result)[NextLink]], 
+               each [Result]),
+    ListsInTable = Table.FromList( Pagination, Splitter.SplitByNothing(), null, null, ExtraValues.Error)
+    in
+        ListsInTable;
+
+
 
 WooCommerce.Sales = (siteurl as text, api_version as text) =>
     let
